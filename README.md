@@ -22,7 +22,7 @@ see [zones.yaml](zones.yaml) for the format.
 To run on the command line (assuming you have `dnslib>=0.9.7` and python>=3.6 installed):
 
 ```sh
-dnserver.py --port=5053
+./dnserver.py --port=5053
 ```
 
 You can then test (either of the above) with
