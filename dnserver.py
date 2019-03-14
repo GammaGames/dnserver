@@ -135,9 +135,9 @@ def handle_sig(signum, frame):
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('port', default=53)
-@click.argument('upstream', default='1.1.1.1')
-@click.argument('zonefile', default='./zones.yaml')
+@click.option('--port', '-p', default=53, help="Port to listen to")
+@click.option('--upstream', '-u', default='1.1.1.1', help="Upstream IP to use")
+@click.option('--zonefile', '-z', default='./zones.yaml', type=click.Path(exists=True), help="Yaml zone file")
 def cli(port, upstream, zonefile):
     signal.signal(signal.SIGTERM, handle_sig)
 
