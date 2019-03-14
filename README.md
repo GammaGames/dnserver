@@ -2,32 +2,28 @@
 
 Simple DNS server written in python for use in development and testing.
 
-The DNS serves it's own records, if none are found it proxies the request to an upstream DNS server 
-eg. google at `8.8.8.8`.
+The DNS serves it's own records, if none are found it proxies the request to an upstream DNS server (`1.1.1.1` by default)
 
-You can setup records you want to serve with a custom `zones.txt` file, 
-see [example_zones.txt](example_zones.txt) for the format.
+You can setup records you want to serve with a custom `zones.yaml` file, 
+see [zones.yaml](zones.yaml) for the format.
 
-To use with docker:
+```yaml
+- name: example.com
+  entries:
+  - type: A
+    args:
+    - 1.2.3.4
+  - type: MX
+    args:
+    - whatever.com
+    - 5
+```
 
-    docker run -p 5053:53/udp -p 5053:53/tcp --rm samuelcolvin/dnserver
+To run on the command line (assuming you have `dnslib>=0.9.7` and python>=3.6 installed):
 
-(See [dnserver on hub.docker.com](https://hub.docker.com/r/samuelcolvin/dnserver/))
-
-Or with a custom zone file
-
-    docker run -p 5053:53/udp -v `pwd`/zones.txt:/zones/zones.txt --rm samuelcolvin/dnserver
-
-(assuming you have your zone records at `./zones.txt`, 
-TCP isn't required to use `dig`, hence why it's omitted in this case.)
-
-Or see [docker-compose.yml](docker-compose.yml) for example of using dnserver with docker compose. 
-It demonstrates using dnserver as the DNS server for another container which then tries to make DNS queries
-for numerous domains.
-
-To run without docker (assuming you have `dnslib==0.9.7` and python 3.6 installed):
-
-    PORT=5053 ZONE_FILE='./example_zones.txt' ./dnserver.py
+```sh
+dnserver.py --port=5053
+```
 
 You can then test (either of the above) with
 
