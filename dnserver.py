@@ -7,6 +7,8 @@ from datetime import datetime
 from pathlib import Path
 from textwrap import wrap
 from time import sleep
+import click
+import yaml
 
 from dnslib import DNSLabel, QTYPE, RR, dns
 from dnslib.proxy import ProxyResolver
@@ -81,36 +83,25 @@ class Resolver(ProxyResolver):
         super().__init__(upstream, 53, 5)
         self.records = self.load_zones(zone_file)
 
-    def zone_lines(self):
-        current_line = ''
-        for line in zone_file.open():
-            if line.startswith('#'):
-                continue
-            line = line.rstrip('\r\n\t ')
-            if not line.startswith(' ') and current_line:
-                yield current_line
-                current_line = ''
-            current_line += line.lstrip('\r\n\t ')
-        if current_line:
-            yield current_line
-
     def load_zones(self, zone_file):
-        assert zone_file.exists(), f'zone files "{zone_file}" does not exist'
         logger.info('loading zone file "%s":', zone_file)
         zones = []
-        for line in self.zone_lines():
-            try:
-                rname, rtype, args_ = line.split(maxsplit=2)
+        with open(os.path.abspath(zone_file)) as f:
+            data = yaml.load(f)
 
-                if args_.startswith('['):
-                    args = tuple(json.loads(args_))
-                else:
-                    args = (args_,)
-                record = Record(rname, rtype, args)
-                zones.append(record)
-                logger.info(' %2d: %s', len(zones), record)
+        for site in data:
+            try:
+                name = site['name']
+                for entry in site['entries']:
+                    type = entry['type']
+                    args = tuple(entry['args'])
+
+                    record = Record(name, type, args)
+                    zones.append(record)
+                    logger.info(' %2d: %s', len(zones), record)
+
             except Exception as e:
-                raise RuntimeError(f'Error processing line ({e.__class__.__name__}: {e}) "{line.strip()}"') from e
+                raise RuntimeError(f'Error processing yaml ({e.__class__.__name__}: {e})') from e
         logger.info('%d zone resource records generated from zone file', len(zones))
         return zones
 
@@ -143,13 +134,14 @@ def handle_sig(signum, frame):
     exit(0)
 
 
-if __name__ == '__main__':
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.argument('port', default=53)
+@click.argument('upstream', default='1.1.1.1')
+@click.argument('zonefile', default='./zones.yaml')
+def cli(port, upstream, zonefile):
     signal.signal(signal.SIGTERM, handle_sig)
 
-    port = int(os.getenv('PORT', 53))
-    upstream = os.getenv('UPSTREAM', '8.8.8.8')
-    zone_file = Path(os.getenv('ZONE_FILE', '/zones/zones.txt'))
-    resolver = Resolver(upstream, zone_file)
+    resolver = Resolver(upstream, zonefile)
     udp_server = DNSServer(resolver, port=port)
     tcp_server = DNSServer(resolver, port=port, tcp=True)
 
@@ -162,3 +154,7 @@ if __name__ == '__main__':
             sleep(1)
     except KeyboardInterrupt:
         pass
+
+
+if __name__ == '__main__':
+    cli()

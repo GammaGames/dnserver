@@ -1,0 +1,41 @@
+- name: example.com
+  entries:
+  - type: A
+    args:
+    - 1.2.3.4
+  - type: CNAME
+    args:
+    - whatever.com
+  - type: MX
+    args:
+    - whatever.com
+    - 5
+  - type: MX
+    args:
+    - mx2.whatever.com.
+    - 10
+  - type: MX
+    args:
+    - mx3.whatever.com.
+    - 20
+  - type: NS
+    args:
+    - ns1.whatever.com.
+  - type: NS
+    args:
+    - ns2.whatever.com.
+  - type: TXT
+    args:
+    - hello this is some text
+  - type: SOA
+    args:
+    - ns1.example.com
+    - dns.example.com
+  - type: TXT
+    args:
+    - >-
+      one long value: IICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAg
+      FWZUed1qcBziAsqZ/LzT2ASxJYuJ5sko1CzWFhFuxiluNnwKjSknSjanyYnm0vro4dhAtyiQ7O
+      PVROOaNy9Iyklvu91KuhbYi6l80Rrdnuq1yjM//xjaB6DGx8+m1ENML8PEdSFbKQbh9akm2bkN
+      w5DC5a8Slp7j+eEVHkgV3k3oRhkPcrKyoPVvniDNH+Ln7DnSGC+Aw5Sp+fhu5aZmoODhhX5/1m
+      ANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA26JaFWZUed1qcBziAsqZ/LzTF2ASxJYuJ5sk
